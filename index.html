@@ -106,7 +106,7 @@ h1{margin:12px 0 0; font-size:40px; line-height:1.2}
             <input id="tgeDate" type="date" class="input">
           </label>
           <div class="notice"><span data-i18n="daysToTge">距离今天：</span><span id="daysToTgeNum">—</span><span data-i18n="daysSuffix"> 天</span></div>
-          <div class="notice" style="border:1px dashed var(--border); border-radius:12px; padding:10px; background:rgba(255,255,255,.7)" data-i18n="note">说明：未填“全网每日新增”时，按总量以每日增速复利增长；填了则按每日新增复利累计。</div>
+          <div class="notice" style="border:1px dashed var(--border); border-radius:12px; padding:10px; background:rgba(255,255,255,.7)" data-i18n="note">说明：未填“全网每日新增”时，按总量×每日增速，做线性累计；填了则按每日新增做线性累计。</div>
         </div>
       </div>
     </div>
@@ -204,7 +204,8 @@ h1{margin:12px 0 0; font-size:40px; line-height:1.2}
       tgeDate: 'TGE 日期',
       daysToTge: '距离今天：',
       daysSuffix: ' 天',
-      note: '说明：未填“全网每日新增”时，按总量以每日增速复利增长；填了则按每日新增复利累计。',
+      // ✅ 说明改为线性累计
+      note: '说明：未填“全网每日新增”时，按总量×每日增速，做线性累计；填了则按每日新增做线性累计。',
       oneM: '1M MILES 的预测价值',
       myAtTge: 'TGE 我的累计 Miles',
       netAtTge: '预测全网累计（TGE）',
@@ -239,7 +240,8 @@ h1{margin:12px 0 0; font-size:40px; line-height:1.2}
       tgeDate: 'TGE Date',
       daysToTge: 'Days from today: ',
       daysSuffix: '',
-      note: 'Note: If network daily is empty, total grows compounding by daily growth; otherwise compounding sum of daily additions.',
+      // ✅ Linear wording
+      note: 'Note: If network daily is empty, total grows linearly by (current total × daily growth); otherwise it grows linearly by the provided daily addition.',
       oneM: 'Predicted value of 1M MILES',
       myAtTge: 'My cumulative Miles at TGE',
       netAtTge: 'Predicted Network Total (TGE)',
@@ -291,23 +293,48 @@ h1{margin:12px 0 0; font-size:40px; line-height:1.2}
   function compute(){
     var tge=new Date(document.getElementById('tgeDate').value||'2025-10-15');
     var days=daysBetween(today,tge); setText(el.daysToTgeNum, days);
-    var g=Math.max(0, parseNum(el.growthPct.value,1.3)/100);
+
+    var g=Math.max(0, parseNum(el.growthPct.value,1.3)/100);  // 每日“增速”作为当天固定增量的比例（线性）
     var M0=parseNum(el.currentMiles.value,0);
     var d0=parseNum(el.myDailyMiles.value,0);
-    var myAdded=geomSum(d0,g,days); var myMilesAtTGE=M0+myAdded; setText(el.myMilesAtTGE, fmt(myMilesAtTGE,2));
+
+    // ✅ 个人：线性累计
+    var myAdded = d0 * days;
+    var myMilesAtTGE = M0 + myAdded;
+    setText(el.myMilesAtTGE, fmt(myMilesAtTGE,2));
+
     var topRaw=el.top100Sum.getAttribute('data-raw')||el.top100Sum.textContent||'';
-    var topSum=parseNum(topRaw,NaN); var shareNow=Math.max(1e-9, parseNum(el.topShare&&el.topShare.value,70)/100);
+    var topSum=parseNum(topRaw,NaN);
+    var shareNow=Math.max(1e-9, parseNum(el.topShare&&el.topShare.value,70)/100);
     if(el.shareLabel) el.shareLabel.textContent=(parseNum(el.topShare.value,70)||70);
     var T0=isFinite(topSum)?(topSum/shareNow):null; if(isFinite(topSum)) setText(el.totalNow, fmt(T0,0));
-    var D0=parseNum(el.netDailyMilesNow.value,0); var T_pred=null;
-    if(T0!=null){ if(D0>0) T_pred=T0+geomSum(D0,g,days); else T_pred=T0*Math.pow(1+g,days); }
+
+    var D0=parseNum(el.netDailyMilesNow.value,0);
+    var T_pred=null;
+
+    if(T0!=null){
+      // ✅ 全网：全部线性，不复利
+      if(D0>0){
+        // 给了“全网每日新增” → 直接按固定每日新增线性累计
+        T_pred = T0 + D0 * days;
+      }else{
+        // 没给“全网每日新增” → 用“每日增速%”折算成固定的每日新增 = T0 * g
+        var dailyIncFromRate = T0 * g;
+        T_pred = T0 + dailyIncFromRate * days;
+      }
+    }
+
     setText(el.T_pred, (T_pred!=null)?fmt(T_pred,0):'—');
+
     var fdv=parseNum(el.fdv.value,1000000000); var ap=Math.max(0, parseNum(el.airdropPct.value,8)/100); var pool=fdv*ap;
     var sharePct=T_pred?(myMilesAtTGE/T_pred):null; var myVal=(sharePct!=null)?(pool*sharePct):null;
+
     el.myAirdropValue.setAttribute('data-value', (myVal!=null)?('≈ $'+fmt(myVal,2)):'—');
     el.sharePct.setAttribute('data-value', (sharePct!=null)?((sharePct*100).toFixed(6)+'%'):'—');
     if(window._resultUnlocked){ setText(el.myAirdropValue, el.myAirdropValue.getAttribute('data-value')); setText(el.sharePct, el.sharePct.getAttribute('data-value')); }
+
     var oneM=(T_pred!=null)?(pool*(1000000/T_pred)):null; setText(el.oneMMilesValue, (oneM!=null)?('≈ $'+fmt(oneM,2)):'—');
+
     applyI18n(); // keep prefixes correct
   }
 
