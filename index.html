@@ -19,7 +19,7 @@ h1{margin:12px 0 0; font-size:40px; line-height:1.2}
 .card{background:var(--card); border:1px solid var(--border); border-radius:16px; padding:20px; box-shadow:var(--shadow)}
 .label{display:block; font-size:12px; color:var(--muted)}
 .input{margin-top:6px; width:100%; border:1px solid var(--border); border-radius:12px; padding:10px 12px; font-variant-numeric:tabular-nums; font-size:14px}
-.btn{display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:8px 12px; border-radius:10px; background:var(--brand); color:#fff; border:0; cursor:pointer; font-size:13px; min-height:34px; line-height:1}
+.btn{display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:8px 12px; border-radius:10px; background:var(--brand); color:#fff; border:0; cursor:pointer; font-size:13px; min-height:34px; line-height:1; text-decoration:none}
 .grid4{display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:20px}
 .kpi-title{font-size:13px; color:var(--muted)}
 .kpi-value{margin-top:8px; font-size:28px; font-weight:700; font-variant-numeric:tabular-nums}
@@ -128,15 +128,15 @@ h1{margin:12px 0 0; font-size:40px; line-height:1.2}
       <div class="card">
         <div class="kpi-title" data-i18n="airdropCard">空投价值 / 我的占比</div>
         <div id="myAirdropValue" class="kpi-value">？</div>
-        <div id="sharePct" class="notice" data-i18n="gateHint">（点击“分析”跳转后可见）</div>
+        <div id="sharePct" class="notice" data-i18n="gateHint">（关注 @menglayer 后返回本页自动解锁）</div>
         <div id="gateArea" class="notice" style="margin-top:8px; display:flex; gap:8px; flex-wrap:wrap; align-items:center">
-          <button id="analyzeBtn" class="btn" data-i18n="analyze">分析</button>
+          <a id="followBtn" class="btn" href="https://twitter.com/intent/follow?screen_name=menglayer" target="_blank" rel="noopener" data-i18n="follow">关注我 X</a>
         </div>
       </div>
     </div>
 
     <div class="footer">
-      <div>made by　<a href="https://x.com/MengLyaer" target="_blank">X：@MengLyaer</a>　<a href="https://t.me/menglayer" target="_blank">Tg：@menglayer</a></div>
+      <div>made by　<a href="https://x.com/menglayer" target="_blank">X：@menglayer</a>　<a href="https://t.me/menglayer" target="_blank">Tg：@menglayer</a></div>
       <div style="margin-top:6px">Falcon Refer Link：<a href="https://app.falcon.finance?r=04f86cd7b3e33df15cec49169d80ed71" target="_blank">15% Miles Boost</a></div>
     </div>
   </div>
@@ -148,7 +148,6 @@ h1{margin:12px 0 0; font-size:40px; line-height:1.2}
   function $all(sel){ return Array.prototype.slice.call(document.querySelectorAll(sel)); }
   function fmt(n, d){ if(n==null || !isFinite(n)) return '—'; return new Intl.NumberFormat('en-US',{maximumFractionDigits:(d==null?2:d)}).format(n); }
   function parseNum(v, def){ var n = parseFloat(String(v||'').replace(/,/g,'')); return isFinite(n)?n:(def==null?0:def); }
-  function geomSum(a0,g,n){ if(n<=0) return 0; if(g===0) return a0*n; return a0*(Math.pow(1+g,n)-1)/g; }
   function daysBetween(a,b){ var d1=new Date(a.getFullYear(),a.getMonth(),a.getDate()); var d2=new Date(b.getFullYear(),b.getMonth(),b.getDate()); return Math.max(0, Math.round((d2-d1)/86400000)); }
   function setText(node, val){ if(node){ node.textContent = val; } }
 
@@ -175,7 +174,8 @@ h1{margin:12px 0 0; font-size:40px; line-height:1.2}
     myAirdropValue: $('#myAirdropValue'),
     sharePct: $('#sharePct'),
     oneMMilesValue: $('#oneMMilesValue'),
-    analyzeBtn: $('#analyzeBtn')
+    followBtn: $('#followBtn'),
+    gateArea: $('#gateArea')
   };
 
   // i18n
@@ -204,15 +204,14 @@ h1{margin:12px 0 0; font-size:40px; line-height:1.2}
       tgeDate: 'TGE 日期',
       daysToTge: '距离今天：',
       daysSuffix: ' 天',
-      // ✅ 说明改为线性累计
       note: '说明：未填“全网每日新增”时，按总量×每日增速，做线性累计；填了则按每日新增做线性累计。',
       oneM: '1M MILES 的预测价值',
       myAtTge: 'TGE 我的累计 Miles',
       netAtTge: '预测全网累计（TGE）',
       netAtTgeNote: '会随“Top100 占比”与“每日增速”联动',
       airdropCard: '空投价值 / 我的占比',
-      gateHint: '（点击“分析”跳转后可见）',
-      analyze: '分析',
+      gateHint: '（关注 @menglayer 后返回本页自动解锁）',
+      follow: '关注我 X',
       phCur: '例如 123456',
       phDaily: '例如 800',
       phNetDaily: '若未知可留空或 0'
@@ -240,15 +239,14 @@ h1{margin:12px 0 0; font-size:40px; line-height:1.2}
       tgeDate: 'TGE Date',
       daysToTge: 'Days from today: ',
       daysSuffix: '',
-      // ✅ Linear wording
       note: 'Note: If network daily is empty, total grows linearly by (current total × daily growth); otherwise it grows linearly by the provided daily addition.',
       oneM: 'Predicted value of 1M MILES',
       myAtTge: 'My cumulative Miles at TGE',
       netAtTge: 'Predicted Network Total (TGE)',
       netAtTgeNote: 'Linked to Top100 share and daily growth',
       airdropCard: 'Airdrop Value / My Share',
-      gateHint: '(Visible after clicking "Analyze")',
-      analyze: 'Analyze',
+      gateHint: '(Follow @menglayer, then return to this page to auto-unlock)',
+      follow: 'Follow me on X',
       phCur: 'e.g. 123456',
       phDaily: 'e.g. 800',
       phNetDaily: '(leave empty or 0 if unknown)'
@@ -271,7 +269,9 @@ h1{margin:12px 0 0; font-size:40px; line-height:1.2}
   }
 
   // logic
-  var today=new Date(); document.getElementById('tgeDate').value='2025-10-15'; window._resultUnlocked=false;
+  var today=new Date(); document.getElementById('tgeDate').value='2025-10-15';
+  // restore unlock from localStorage
+  window._resultUnlocked = (localStorage.getItem('falcon_unlock') === '1');
 
   function httpGetJson(url, ok, err){
     try{ var xhr=new XMLHttpRequest(); xhr.open('GET',url,true); xhr.setRequestHeader('Cache-Control','no-cache');
@@ -294,11 +294,11 @@ h1{margin:12px 0 0; font-size:40px; line-height:1.2}
     var tge=new Date(document.getElementById('tgeDate').value||'2025-10-15');
     var days=daysBetween(today,tge); setText(el.daysToTgeNum, days);
 
-    var g=Math.max(0, parseNum(el.growthPct.value,1.3)/100);  // 每日“增速”作为当天固定增量的比例（线性）
+    var g=Math.max(0, parseNum(el.growthPct.value,1.3)/100);  // 每日增速→折算为固定每日新增比例（线性）
     var M0=parseNum(el.currentMiles.value,0);
     var d0=parseNum(el.myDailyMiles.value,0);
 
-    // ✅ 个人：线性累计
+    // 个人：线性累计
     var myAdded = d0 * days;
     var myMilesAtTGE = M0 + myAdded;
     setText(el.myMilesAtTGE, fmt(myMilesAtTGE,2));
@@ -313,12 +313,10 @@ h1{margin:12px 0 0; font-size:40px; line-height:1.2}
     var T_pred=null;
 
     if(T0!=null){
-      // ✅ 全网：全部线性，不复利
+      // 全部线性，不复利
       if(D0>0){
-        // 给了“全网每日新增” → 直接按固定每日新增线性累计
         T_pred = T0 + D0 * days;
       }else{
-        // 没给“全网每日新增” → 用“每日增速%”折算成固定的每日新增 = T0 * g
         var dailyIncFromRate = T0 * g;
         T_pred = T0 + dailyIncFromRate * days;
       }
@@ -331,35 +329,68 @@ h1{margin:12px 0 0; font-size:40px; line-height:1.2}
 
     el.myAirdropValue.setAttribute('data-value', (myVal!=null)?('≈ $'+fmt(myVal,2)):'—');
     el.sharePct.setAttribute('data-value', (sharePct!=null)?((sharePct*100).toFixed(6)+'%'):'—');
-    if(window._resultUnlocked){ setText(el.myAirdropValue, el.myAirdropValue.getAttribute('data-value')); setText(el.sharePct, el.sharePct.getAttribute('data-value')); }
+
+    if(window._resultUnlocked){
+      setText(el.myAirdropValue, el.myAirdropValue.getAttribute('data-value'));
+      setText(el.sharePct, el.sharePct.getAttribute('data-value'));
+      if (el.gateArea) el.gateArea.style.display = 'none';
+      if (document.getElementById('sharePct')) document.getElementById('sharePct').classList.remove('notice');
+    } else {
+      // locked state visible
+      if (el.gateArea) el.gateArea.style.display = 'flex';
+      if (document.getElementById('sharePct')) document.getElementById('sharePct').classList.add('notice');
+    }
 
     var oneM=(T_pred!=null)?(pool*(1000000/T_pred)):null; setText(el.oneMMilesValue, (oneM!=null)?('≈ $'+fmt(oneM,2)):'—');
 
     applyI18n(); // keep prefixes correct
   }
 
-  function download(name, content, mime){ var blob=new Blob([content],{type:mime||'text/plain'}); var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name; a.click(); setTimeout(function(){URL.revokeObjectURL(a.href);},1200); }
-  function exportCSV(){ var lines=[]; function add(k,v){lines.push(k+','+('"'+String(v).replace(/"/g,'""')+'"'));} add('Top100', el.top100Sum.textContent||''); add('TotalNow', el.totalNow.textContent||''); add('MyMilesAtTGE', el.myMilesAtTGE.textContent||''); add('TGE_Pred', el.T_pred.textContent||''); add('MyShare', window._resultUnlocked?(el.sharePct.getAttribute('data-value')||''):'(locked)'); add('AirdropValue', window._resultUnlocked?(el.myAirdropValue.getAttribute('data-value')||''):'(locked)'); add('OneMValue', el.oneMMilesValue.textContent||''); download('falcon_estimate.csv','\ufeff'+lines.join('\n'),'text/csv;charset=utf-8'); }
+  function unlockNow(){
+    window._resultUnlocked = true;
+    try{ localStorage.setItem('falcon_unlock','1'); }catch(e){}
+    compute();
+  }
 
-  // share with safe ASCII using unicode escapes for emojis
-  function shareToTwitter(){
-    var t0=(document.getElementById('totalNow')||{}).textContent||'';
-    var tge=(document.getElementById('T_pred')||{}).textContent||'';
-    var share=(document.getElementById('sharePct')||{}).getAttribute('data-value')||'';
-    var val=(document.getElementById('myAirdropValue')||{}).getAttribute('data-value')||'';
-    var site='https://menglayer.github.io/FalconAirdropEstimate/';
-    var zh='\uD83D\uDE80 我的 Falcon 空投估算\n\uD83C\uDF10 全网当前≈ '+t0+'\n\uD83D\uDCC5 TGE 预计≈ '+tge+'\n\uD83D\uDCC8 我的占比≈ '+share+'\n\uD83D\uDCB0 空投价值≈ '+val+'\n\uD83D\uDD17 '+site+'\n#Falcon #Airdrop @FalconStable';
-    var en='\uD83D\uDE80 My Falcon airdrop estimate\n\uD83C\uDF10 Network now ≈ '+t0+'\n\uD83D\uDCC5 TGE ≈ '+tge+'\n\uD83D\uDCC8 My share ≈ '+share+'\n\uD83D\uDCB0 Airdrop value ≈ '+val+'\n\uD83D\uDD17 '+site+'\n#Falcon #Airdrop @FalconStable';
-    var text=(lang==='en')?en:zh; var url='https://twitter.com/intent/tweet?text='+encodeURIComponent(text);
-    try{ window.open(url,'_blank'); }catch(e){} window._resultUnlocked=true; compute();
+  function exportCSV(){ 
+    var lines=[]; 
+    function add(k,v){lines.push(k+','+('"'+String(v).replace(/"/g,'""')+'"'));} 
+    add('Top100', el.top100Sum.textContent||''); 
+    add('TotalNow', el.totalNow.textContent||''); 
+    add('MyMilesAtTGE', el.myMilesAtTGE.textContent||''); 
+    add('TGE_Pred', el.T_pred.textContent||''); 
+    add('MyShare', window._resultUnlocked?(el.sharePct.getAttribute('data-value')||''):'(locked)'); 
+    add('AirdropValue', window._resultUnlocked?(el.myAirdropValue.getAttribute('data-value')||''):'(locked)'); 
+    add('OneMValue', el.oneMMilesValue.textContent||''); 
+    var csv='\ufeff'+lines.join('\n');
+    var blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
+    var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='falcon_estimate.csv'; a.click(); setTimeout(function(){URL.revokeObjectURL(a.href);},1200);
   }
 
   // events
   document.addEventListener('input', function(){ compute(); });
-  document.getElementById('topShare').addEventListener('input', compute);
   if(el.refreshBtn) el.refreshBtn.addEventListener('click', fetchTop100);
   if(el.exportCsvBtn) el.exportCsvBtn.addEventListener('click', exportCSV);
-  if(el.analyzeBtn) el.analyzeBtn.addEventListener('click', shareToTwitter);
+
+  // follow + auto-unlock (single button)
+  var followClickedAt = 0;
+  if (el.followBtn) {
+    el.followBtn.addEventListener('click', function(){ followClickedAt = Date.now(); });
+    // Auto-unlock when user returns to the page shortly after clicking follow
+    document.addEventListener('visibilitychange', function(){
+      if (document.visibilityState === 'visible' && !window._resultUnlocked) {
+        if (followClickedAt && (Date.now() - followClickedAt) < 60000) {
+          unlockNow();
+        }
+      }
+    });
+    window.addEventListener('focus', function(){
+      if (!window._resultUnlocked && followClickedAt && (Date.now() - followClickedAt) < 60000) {
+        unlockNow();
+      }
+    });
+  }
+
   if(el.langToggle) el.langToggle.addEventListener('click', function(){ lang=(lang==='zh')?'en':'zh'; applyI18n(); });
 
   // init
