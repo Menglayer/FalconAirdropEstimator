@@ -24,18 +24,131 @@
     ytAirdropValue: $('#ytAirdropValue'), ytROI: $('#ytROI'),
     refreshBtn: $('#refreshBtn'), exportCsvBtn: $('#exportCsvBtn')
   };
+  // ---------- i18n ----------
+  const i18n = {
+    zh: {
+      title: '预估你的 <span style="color:#2b66cc">$Falcon</span> 空投价值',
+      myParams: '我的参数',
+      ytParams: 'YT 参数（Pendle）',
+      ytType: 'YT 种类',
+      ytPrice: 'YT 单价（USD）',
+      ytBuyUsd: '买入价值（YT / USD）',
+      ytQty: 'YT 数量',
+      currentMiles: '当前 Miles',
+      myDailyMiles: '当前 每日 Miles',
+      netAssumptions: '全网与假设',
+      topShare: 'Top100 占比（%）',
+      growthPct: '每日增速（%）',
+      fdv: 'TGE 时 FDV',
+      airdropPct: 'TGE 时空投比例（%）',
+      netDaily: '（可选）全网当前每日新增 Miles',
+      timeData: '时间与数据',
+      tgeDate: 'TGE 日期',
+      daysTo: '距离今天：',
+      susdfNote: 'SUSDF 的 YT 默认按每年 9/25 到期；若 TGE 晚于该日，则 YT 积分只累计至到期。',
+      helpNote: '说明：YT 积分=YT数量 × 持有小时 × (每日积分/24) × 倍数；到期=min(接口到期, SUSDF固定9/25, TGE)。',
+      kpi1: '1M MILES 的预测价值',
+      kpi2: 'TGE 我的累计 Miles',
+      kpi3: '预测全网累计（TGE）',
+      kpi4: '空投价值 / 我的占比',
+      kpi5: 'YT 至 TGE 可获 Miles',
+      kpi6: 'YT 预估空投价值 & ROI',
+      btnRefresh: '刷新 Top100',
+      btnExport: '导出 CSV',
+      follow: '关注我 X',
+      statusFetching: '请求中...',
+      statusUpdated: '已更新',
+      ytContribution: 'YT 至 TGE 贡献：'
+    },
+    en: {
+      title: 'Estimate your <span style="color:#2b66cc">$Falcon</span> Airdrop Value',
+      myParams: 'My Parameters',
+      ytParams: 'YT (Pendle)',
+      ytType: 'YT Type',
+      ytPrice: 'YT Price (USD)',
+      ytBuyUsd: 'Buy Amount (USD)',
+      ytQty: 'YT Quantity',
+      currentMiles: 'Current Miles',
+      myDailyMiles: 'Current Daily Miles',
+      netAssumptions: 'Network & Assumptions',
+      topShare: 'Top100 Share (%)',
+      growthPct: 'Daily Growth (%)',
+      fdv: 'FDV at TGE',
+      airdropPct: 'Airdrop % at TGE',
+      netDaily: '(Optional) Network Daily New Miles Now',
+      timeData: 'Time & Data',
+      tgeDate: 'TGE Date',
+      daysTo: 'Days from Today: ',
+      susdfNote: 'SUSDF YT matures on 9/25 each year; if TGE is later, YT points accrue only until maturity.',
+      helpNote: 'Note: YT points = qty × holding hours × (daily points/24) × multiplier; maturity = min(API expiry, SUSDF 9/25, TGE).',
+      kpi1: 'Value of 1M MILES',
+      kpi2: 'My Miles at TGE',
+      kpi3: 'Predicted Network Total (TGE)',
+      kpi4: 'Airdrop Value / My Share',
+      kpi5: 'YT Miles until TGE',
+      kpi6: 'YT Estimated Airdrop & ROI',
+      btnRefresh: 'Refresh Top100',
+      btnExport: 'Export CSV',
+      follow: 'Follow me on X',
+      statusFetching: 'Fetching...',
+      statusUpdated: 'Updated',
+      ytContribution: 'YT contribution till TGE: '
+    }
+  };
+  let LANG = (localStorage.getItem('falcon_lang') || 'zh');
+  function setLang(l){ LANG=l; try{localStorage.setItem('falcon_lang', l);}catch(e){} applyLang(); }
+  function t(key){ return (i18n[LANG] && i18n[LANG][key]) || (i18n.zh[key]||key); }
+  function labelForInput(id){ const inp=document.getElementById(id); return inp?inp.parentElement:null; }
+  function applyLang(){
+    // Title
+    const h1=document.getElementById('titleH1'); if(h1) h1.innerHTML=t('title');
+    // Buttons
+    if(el.refreshBtn) el.refreshBtn.textContent = t('btnRefresh');
+    if(el.exportCsvBtn) el.exportCsvBtn.textContent = t('btnExport');
+    if(el.followBtn) el.followBtn.textContent = t('follow');
+    // KPI titles (grid cards, fixed order)
+    const gridTitles = Array.from(document.querySelectorAll('.grid4 .card .kpi-title'));
+    if(gridTitles[0]) gridTitles[0].textContent = t('kpi1');
+    if(gridTitles[1]) gridTitles[1].textContent = t('kpi2');
+    if(gridTitles[2]) gridTitles[2].textContent = t('kpi3');
+    if(gridTitles[3]) gridTitles[3].textContent = t('kpi4');
+    if(gridTitles[4]) gridTitles[4].textContent = t('kpi5');
+    if(gridTitles[5]) gridTitles[5].textContent = t('kpi6');
+    // Left column card titles
+    const leftTitles = Array.from(document.querySelectorAll('.row > .card .kpi-title'));
+    if(leftTitles[0]) leftTitles[0].textContent = t('myParams');
+    if(leftTitles[1]) leftTitles[1].textContent = t('netAssumptions');
+    if(leftTitles[2]) leftTitles[2].textContent = t('timeData');
+    // Labels next to inputs
+    const lbCM = labelForInput('currentMiles'); if(lbCM){ lbCM.childNodes[0].textContent = t('currentMiles')+' '; }
+    const lbDM = labelForInput('myDailyMiles'); if(lbDM){ lbDM.childNodes[0].textContent = t('myDailyMiles')+' '; }
+    const lbYtType = labelForInput('ytType'); if(lbYtType){ lbYtType.childNodes[0].textContent = t('ytType')+' '; }
+    const lbYtPrice = labelForInput('ytPriceUsd'); if(lbYtPrice){ lbYtPrice.childNodes[0].textContent = t('ytPrice')+' '; }
+    const lbYtBuy = labelForInput('ytBuyUsd'); if(lbYtBuy){ lbYtBuy.childNodes[0].textContent = t('ytBuyUsd')+' '; }
+    const lbYtQty = labelForInput('ytQty'); if(lbYtQty){ lbYtQty.childNodes[0].textContent = t('ytQty')+' '; }
+    const lbTopShare = labelForInput('topShare'); if(lbTopShare){ lbTopShare.childNodes[0].textContent = t('topShare')+' '; }
+    const lbGrowth = labelForInput('growthPct'); if(lbGrowth){ lbGrowth.childNodes[0].textContent = t('growthPct')+' '; }
+    const lbFdv = labelForInput('fdv'); if(lbFdv){ lbFdv.childNodes[0].textContent = t('fdv')+' '; }
+    const lbAP = labelForInput('airdropPct'); if(lbAP){ lbAP.childNodes[0].textContent = t('airdropPct')+' '; }
+    const lbND = labelForInput('netDailyMilesNow'); if(lbND){ lbND.childNodes[0].textContent = t('netDaily')+' '; }
+    const lbTGE = labelForInput('tgeDate'); if(lbTGE){ lbTGE.parentElement.querySelector('.label').childNodes[0].textContent = t('tgeDate')+' '; }
+    // Notes
+    const sus = document.getElementById('susdfNote'); if(sus) sus.textContent = t('susdfNote');
+    const dayWrap = document.getElementById('daysToTgeNum'); if(dayWrap){ const parent = dayWrap.parentElement; if(parent) parent.childNodes[0].textContent = t('daysTo'); }
+  }
+
 
   // Top100
   function httpGetJson(url, ok, err){ try{ const x=new XMLHttpRequest(); x.open('GET',url,true); x.setRequestHeader('Cache-Control','no-cache');
     x.onreadystatechange=()=>{ if(x.readyState===4){ if(x.status>=200&&x.status<300){ try{ ok(JSON.parse(x.responseText)); }catch(e){ err(e);} } else err(new Error('HTTP '+x.status)); }};
     x.send(); }catch(e){ err(e);} }
   function fetchTop100(){
-    setText(el.top100Status, '请求中...'); setText(el.top100Sum, '—');
+    setText(el.top100Status, t('statusFetching')); setText(el.top100Sum, '—');
     httpGetJson('https://api.falcon.finance/api/v1/points/leaderboard?ts='+Date.now(), (data)=>{
       const list=(data && data.leaderboard && data.leaderboard.splice?data.leaderboard:[]);
       let sum=0; for(let i=0;i<Math.min(100,list.length);i++){ const v=parseFloat(list[i]?.points||'0'); if(isFinite(v)) sum+=v; }
       el.top100Sum.setAttribute('data-raw', String(sum));
-      setText(el.top100Sum, fmt(sum,0)); setText(el.top100Status, '已更新'); scheduleCompute();
+      setText(el.top100Sum, fmt(sum,0)); setText(el.top100Status, t('statusUpdated')); scheduleCompute(); applyLang();
     }, ()=> setText(el.top100Status, 'Error'));
   }
 
@@ -176,11 +289,11 @@ async function resolveNetworkAndExpiry(ytAddr, tge){
     const qty = (buy>0 && isFinite(priceUsd) && priceUsd>0) ? (buy/priceUsd) : 0;
     el.ytQty.value = (Math.round(qty*10000)/10000).toString();
 
-    scheduleCompute();
+    scheduleCompute(); applyLang();
   }
 
   window._resultUnlocked = (localStorage.getItem('falcon_unlock')==='1');
-  function unlockNow(){ window._resultUnlocked=true; try{localStorage.setItem('falcon_unlock','1');}catch(e){} scheduleCompute(); }
+  function unlockNow(){ window._resultUnlocked=true; try{localStorage.setItem('falcon_unlock','1');}catch(e){} scheduleCompute(); applyLang(); }
   if (el.followBtn){
     let t=0; el.followBtn.addEventListener('click',()=>t=Date.now());
     document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible' && !window._resultUnlocked && t && (Date.now()-t)<60000) unlockNow(); });
@@ -206,7 +319,7 @@ async function resolveNetworkAndExpiry(ytAddr, tge){
     const hrsHold = Math.max(0, Math.round((endDate - new Date())/3600000));
     const ytPoints = qty * (1/24) * hrsHold * p.multiplier;
     setText(el.ytMilesAtTGE, fmt(ytPoints,2));
-    el.ytMilesLine.textContent = 'YT 至 TGE 贡献：'+fmt(ytPoints,2);
+    el.ytMilesLine.textContent = t('ytContribution')+fmt(ytPoints,2);
     myMilesAtTGE += ytPoints;
     setText(el.myMilesAtTGE, fmt(myMilesAtTGE,2));
 
@@ -265,7 +378,13 @@ async function resolveNetworkAndExpiry(ytAddr, tge){
     const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='falcon_estimate.csv'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1200);
   }
 
-  document.addEventListener('input', ()=>scheduleCompute());
+  
+  // Lang toggle buttons
+  const langZHBtn = document.getElementById('langZH');
+  const langENBtn = document.getElementById('langEN');
+  if (langZHBtn) langZHBtn.addEventListener('click', ()=>setLang('zh'));
+  if (langENBtn) langENBtn.addEventListener('click', ()=>setLang('en'));
+document.addEventListener('input', ()=>scheduleCompute());
   if(el.refreshBtn) el.refreshBtn.addEventListener('click', fetchTop100);
   if(el.exportCsvBtn) el.exportCsvBtn.addEventListener('click', exportCSV);
 
@@ -273,7 +392,7 @@ async function resolveNetworkAndExpiry(ytAddr, tge){
   $('#tgeDate').value='2025-10-15';
   fetchTop100();
   updateYtPriceAndQty();
-  scheduleCompute();
+  scheduleCompute(); applyLang();
 
   if (el.ytType) el.ytType.addEventListener('change', updateYtPriceAndQty);
   if (el.tgeDate) el.tgeDate.addEventListener('change', updateYtPriceAndQty);
