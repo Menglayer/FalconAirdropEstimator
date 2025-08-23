@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -33,6 +34,11 @@ h1{margin:12px 0 0; font-size:40px; line-height:1.2}
 .hero .inner{position:relative; z-index:1}
 .footer{margin:24px auto; text-align:center; font-size:12px; color:var(--muted)}
 .footer a{color:#2563eb; text-decoration:none}
+.small{font-size:11px}
+.mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;}
+.badge{display:inline-block; background:#eef2ff; color:#1e40af; padding:3px 8px; border-radius:999px; font-size:11px; margin-right:6px}
+.addr{word-break:break-all}
+.readonly{background:rgba(0,0,0,.03)}
   </style>
 </head>
 <body>
@@ -40,22 +46,18 @@ h1{margin:12px 0 0; font-size:40px; line-height:1.2}
     <div class="container inner">
       <div class="header">
         <div>
-          <h1 id="titleH1" data-i18n-html="title">预估你的 <span style="color:#2b66cc">$Falcon</span> 空投价值</h1>
+          <h1 id="titleH1">预估你的 <span style="color:#2b66cc">$Falcon</span> 空投价值</h1>
         </div>
         <div class="card header-panel">
-          <div class="label" data-i18n="top100Label">Top100 当前合计</div>
+          <div class="label">Top100 当前合计</div>
           <div id="top100Sum" class="kpi-value">—</div>
           <div id="top100Status" class="notice">尚未请求</div>
           <div class="notice" style="margin-top:6px">
-            <span data-i18n="calcNowPrefix">按占比 </span>
-            <span id="shareLabel">70</span>
-            <span data-i18n="calcNowMiddle">% 推算全网当前：</span>
-            <span id="totalNow" style="font-weight:600" class="num">—</span>
+            按占比 <span id="shareLabel">70</span>% 推算全网当前：<span id="totalNow" style="font-weight:600" class="num">—</span>
           </div>
           <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-top:10px">
-            <button id="langToggle" class="btn" title="中/EN">中 / EN</button>
-            <button id="refreshBtn" class="btn" data-i18n="refresh">刷新 Top100</button>
-            <button id="exportCsvBtn" class="btn" data-i18n="exportCsv">导出 CSV</button>
+            <button id="refreshBtn" class="btn">刷新 Top100</button>
+            <button id="exportCsvBtn" class="btn">导出 CSV</button>
           </div>
         </div>
       </div>
@@ -64,338 +66,117 @@ h1{margin:12px 0 0; font-size:40px; line-height:1.2}
 
   <div class="container">
     <div class="row" style="margin-top:20px">
+      <!-- 我的参数 -->
       <div class="card">
-        <div class="kpi-title" style="font-weight:600; color:#0f172a" data-i18n="myParams">我的参数</div>
+        <div class="kpi-title" style="font-weight:600; color:#0f172a">我的参数</div>
         <div style="margin-top:16px; display:flex; flex-direction:column; gap:14px">
-          <label class="label"><span data-i18n="curMiles">当前 Miles</span>
+          <label class="label">当前 Miles
             <input id="currentMiles" class="input" inputmode="decimal" placeholder="例如 123456">
           </label>
-          <label class="label"><span data-i18n="dailyMiles">当前 每日 Miles</span>
+          <label class="label">当前 每日 Miles
             <input id="myDailyMiles" class="input" inputmode="decimal" placeholder="例如 800">
           </label>
+
+          <div class="badge" style="margin-top:4px">YT 参数（Pendle）</div>
+          <label class="label">YT 种类
+            <select id="ytType" class="input">
+              <option value="susdf">SUSDF (36×)</option>
+              <option value="gho_usdf">GHO-USDF (60×)</option>
+              <option value="usdf">USDF (60×)</option>
+            </select>
+          </label>
+          <label class="label">YT 单价（USD）
+            <input id="ytPriceUsd" class="input readonly" placeholder="自动获取" readonly>
+          </label>
+          <label class="label">买入价值（YT / USD）
+            <input id="ytBuyUsd" class="input" inputmode="decimal" placeholder="例如 3000">
+          </label>
+          <label class="label">YT 数量
+            <input id="ytQty" class="input readonly" inputmode="decimal" placeholder="自动计算" readonly>
+          </label>
+          <div id="ytMeta" class="notice small mono" style="line-height:1.5"></div>
         </div>
       </div>
 
+      <!-- 全网与假设 -->
       <div class="card">
-        <div class="kpi-title" style="font-weight:600; color:#0f172a" data-i18n="netAssump">全网与假设</div>
+        <div class="kpi-title" style="font-weight:600; color:#0f172a">全网与假设</div>
         <div style="margin-top:16px; display:flex; flex-direction:column; gap:14px">
           <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px">
-            <label class="label"><span data-i18n="sharePct">Top100 占比（%）</span>
+            <label class="label">Top100 占比（%）
               <input id="topShare" class="input" inputmode="decimal" value="70">
             </label>
-            <label class="label"><span data-i18n="growthPct">每日增速（%）</span>
+            <label class="label">每日增速（%）
               <input id="growthPct" class="input" inputmode="decimal" value="1.3">
             </label>
           </div>
-          <label class="label"><span data-i18n="fdv">TGE 时 FDV</span>
+          <label class="label">TGE 时 FDV
             <input id="fdv" class="input" inputmode="decimal" value="1,000,000,000">
           </label>
-          <label class="label"><span data-i18n="airdropPct">TGE 时空投比例（%）</span>
+          <label class="label">TGE 时空投比例（%）
             <input id="airdropPct" class="input" inputmode="decimal" value="8">
           </label>
-          <label class="label"><span data-i18n="netDaily">（可选）全网当前每日新增 Miles</span>
+          <label class="label">（可选）全网当前每日新增 Miles
             <input id="netDailyMilesNow" class="input" inputmode="decimal" placeholder="若未知可留空或 0">
           </label>
         </div>
       </div>
 
+      <!-- 时间与数据 -->
       <div class="card">
-        <div class="kpi-title" style="font-weight:600; color:#0f172a" data-i18n="timeData">时间与数据</div>
+        <div class="kpi-title" style="font-weight:600; color:#0f172a">时间与数据</div>
         <div style="margin-top:16px; display:flex; flex-direction:column; gap:14px">
-          <label class="label"><span data-i18n="tgeDate">TGE 日期</span>
+          <label class="label">TGE 日期
             <input id="tgeDate" type="date" class="input">
           </label>
-          <div class="notice"><span data-i18n="daysToTge">距离今天：</span><span id="daysToTgeNum">—</span><span data-i18n="daysSuffix"> 天</span></div>
-          <div class="notice" style="border:1px dashed var(--border); border-radius:12px; padding:10px; background:rgba(255,255,255,.7)" data-i18n="note">说明：未填“全网每日新增”时，按总量×每日增速，做线性累计；填了则按每日新增做线性累计。</div>
+          <div class="notice">距离今天：<span id="daysToTgeNum">—</span> 天</div>
+          <div class="notice" id="susdfNote" style="border:1px dashed var(--border); border-radius:12px; padding:10px; background:rgba(255,255,255,.7)">SUSDF 的 YT 默认按每年 9/25 到期；若 TGE 晚于该日，则 YT 积分只累计至到期。</div>
+          <div class="notice" style="border:1px dashed var(--border); border-radius:12px; padding:10px; background:rgba(255,255,255,.7)">说明：YT 积分=YT数量 × 持有小时 × (每日积分/24) × 倍数；到期=min(接口到期, SUSDF固定9/25, TGE)。</div>
         </div>
       </div>
     </div>
 
     <div class="grid4" style="margin-top:20px">
       <div class="card">
-        <div class="kpi-title" data-i18n="oneM">1M MILES 的预测价值</div>
+        <div class="kpi-title">1M MILES 的预测价值</div>
         <div id="oneMMilesValue" class="kpi-value">—</div>
       </div>
       <div class="card">
-        <div class="kpi-title" data-i18n="myAtTge">TGE 我的累计 Miles</div>
+        <div class="kpi-title">TGE 我的累计 Miles</div>
         <div id="myMilesAtTGE" class="kpi-value">—</div>
+        <div class="notice" id="ytMilesLine">YT 至 TGE 贡献：—</div>
       </div>
       <div class="card">
-        <div class="kpi-title" data-i18n="netAtTge">预测全网累计（TGE）</div>
+        <div class="kpi-title">预测全网累计（TGE）</div>
         <div id="T_pred" class="kpi-value">—</div>
-        <div class="notice" data-i18n="netAtTgeNote">会随“Top100 占比”与“每日增速”联动</div>
+        <div class="notice">会随“Top100 占比”与“每日增速”联动</div>
       </div>
       <div class="card">
-        <div class="kpi-title" data-i18n="airdropCard">空投价值 / 我的占比</div>
+        <div class="kpi-title">空投价值 / 我的占比</div>
         <div id="myAirdropValue" class="kpi-value">？</div>
-        <div id="sharePct" class="notice" data-i18n="gateHint">（关注 @menglayer 后返回本页自动解锁）</div>
+        <div id="sharePct" class="notice">（关注 @menglayer 后返回本页自动解锁）</div>
         <div id="gateArea" class="notice" style="margin-top:8px; display:flex; gap:8px; flex-wrap:wrap; align-items:center">
-          <a id="followBtn" class="btn" href="https://twitter.com/intent/follow?screen_name=menglayer" target="_blank" rel="noopener" data-i18n="follow">关注我 X</a>
+          <a id="followBtn" class="btn" href="https://twitter.com/intent/follow?screen_name=menglayer" target="_blank" rel="noopener">关注我 X</a>
         </div>
+      </div>
+
+      <div class="card">
+        <div class="kpi-title">YT 至 TGE 可获 Miles</div>
+        <div id="ytMilesAtTGE" class="kpi-value">—</div>
+      </div>
+      <div class="card">
+        <div class="kpi-title">YT 预估空投价值 & ROI</div>
+        <div id="ytAirdropValue" class="kpi-value">—</div>
+        <div id="ytROI" class="notice">ROI —</div>
       </div>
     </div>
 
     <div class="footer">
-      <div>made by　<a href="https://x.com/menglayer" target="_blank">X：@menglayer</a>　<a href="https://t.me/menglayer" target="_blank">Tg：@menglayer</a></div>
+      <div>v20250823-134501 · yt-auto-qty · made by　<a href="https://x.com/menglayer" target="_blank">X：@menglayer</a>　<a href="https://t.me/menglayer" target="_blank">Tg：@menglayer</a></div>
       <div style="margin-top:6px">Falcon Refer Link：<a href="https://app.falcon.finance?r=04f86cd7b3e33df15cec49169d80ed71" target="_blank">15% Miles Boost</a></div>
     </div>
   </div>
 
-<script>
-(function(){
-  // helpers
-  function $(sel){ return document.querySelector(sel); }
-  function $all(sel){ return Array.prototype.slice.call(document.querySelectorAll(sel)); }
-  function fmt(n, d){ if(n==null || !isFinite(n)) return '—'; return new Intl.NumberFormat('en-US',{maximumFractionDigits:(d==null?2:d)}).format(n); }
-  function parseNum(v, def){ var n = parseFloat(String(v||'').replace(/,/g,'')); return isFinite(n)?n:(def==null?0:def); }
-  function daysBetween(a,b){ var d1=new Date(a.getFullYear(),a.getMonth(),a.getDate()); var d2=new Date(b.getFullYear(),b.getMonth(),b.getDate()); return Math.max(0, Math.round((d2-d1)/86400000)); }
-  function setText(node, val){ if(node){ node.textContent = val; } }
-
-  // elements
-  var el = {
-    top100Sum: $('#top100Sum'),
-    top100Status: $('#top100Status'),
-    totalNow: $('#totalNow'),
-    langToggle: $('#langToggle'),
-    refreshBtn: $('#refreshBtn'),
-    exportCsvBtn: $('#exportCsvBtn'),
-    shareLabel: $('#shareLabel'),
-    topShare: $('#topShare'),
-    growthPct: $('#growthPct'),
-    fdv: $('#fdv'),
-    airdropPct: $('#airdropPct'),
-    netDailyMilesNow: $('#netDailyMilesNow'),
-    currentMiles: $('#currentMiles'),
-    myDailyMiles: $('#myDailyMiles'),
-    tgeDate: $('#tgeDate'),
-    daysToTgeNum: $('#daysToTgeNum'),
-    myMilesAtTGE: $('#myMilesAtTGE'),
-    T_pred: $('#T_pred'),
-    myAirdropValue: $('#myAirdropValue'),
-    sharePct: $('#sharePct'),
-    oneMMilesValue: $('#oneMMilesValue'),
-    followBtn: $('#followBtn'),
-    gateArea: $('#gateArea')
-  };
-
-  // i18n
-  var lang = 'zh';
-  var i18n = {
-    zh: {
-      title: '预估你的 <span style="color:#2b66cc">$Falcon</span> 空投价值',
-      top100Label: 'Top100 当前合计',
-      statusIdle: '尚未请求',
-      statusLoading: '请求中...',
-      statusUpdated: '已更新',
-      calcNowPrefix: '按占比 ',
-      calcNowMiddle: '% 推算全网当前：',
-      refresh: '刷新 Top100',
-      exportCsv: '导出 CSV',
-      myParams: '我的参数',
-      curMiles: '当前 Miles',
-      dailyMiles: '当前 每日 Miles',
-      netAssump: '全网与假设',
-      sharePct: 'Top100 占比（%）',
-      growthPct: '每日增速（%）',
-      fdv: 'TGE 时 FDV',
-      airdropPct: 'TGE 时空投比例（%）',
-      netDaily: '（可选）全网当前每日新增 Miles',
-      timeData: '时间与数据',
-      tgeDate: 'TGE 日期',
-      daysToTge: '距离今天：',
-      daysSuffix: ' 天',
-      note: '说明：未填“全网每日新增”时，按总量×每日增速，做线性累计；填了则按每日新增做线性累计。',
-      oneM: '1M MILES 的预测价值',
-      myAtTge: 'TGE 我的累计 Miles',
-      netAtTge: '预测全网累计（TGE）',
-      netAtTgeNote: '会随“Top100 占比”与“每日增速”联动',
-      airdropCard: '空投价值 / 我的占比',
-      gateHint: '（关注 @menglayer 后返回本页自动解锁）',
-      follow: '关注我',
-      phCur: '例如 123456',
-      phDaily: '例如 800',
-      phNetDaily: '若未知可留空或 0'
-    },
-    en: {
-      title: 'Estimate your <span style="color:#2b66cc">$Falcon</span> airdrop value',
-      top100Label: 'Top100 Total (current)',
-      statusIdle: 'Idle',
-      statusLoading: 'Loading...',
-      statusUpdated: 'Updated',
-      calcNowPrefix: 'Using share ',
-      calcNowMiddle: '% → Estimated network now: ',
-      refresh: 'Refresh Top100',
-      exportCsv: 'Export CSV',
-      myParams: 'My Inputs',
-      curMiles: 'Current Miles',
-      dailyMiles: 'Daily Miles',
-      netAssump: 'Network & Assumptions',
-      sharePct: 'Top100 Share (%)',
-      growthPct: 'Daily Growth (%)',
-      fdv: 'FDV at TGE',
-      airdropPct: 'Airdrop % at TGE',
-      netDaily: '(Optional) Network Daily Miles (now)',
-      timeData: 'Time & Date',
-      tgeDate: 'TGE Date',
-      daysToTge: 'Days from today: ',
-      daysSuffix: '',
-      note: 'Note: If network daily is empty, total grows linearly by (current total × daily growth); otherwise it grows linearly by the provided daily addition.',
-      oneM: 'Predicted value of 1M MILES',
-      myAtTge: 'My cumulative Miles at TGE',
-      netAtTge: 'Predicted Network Total (TGE)',
-      netAtTgeNote: 'Linked to Top100 share and daily growth',
-      airdropCard: 'Airdrop Value / My Share',
-      gateHint: '(Follow @menglayer, then return to this page to auto-unlock)',
-      follow: 'Follow me on X',
-      phCur: 'e.g. 123456',
-      phDaily: 'e.g. 800',
-      phNetDaily: '(leave empty or 0 if unknown)'
-    }
-  };
-
-  function applyI18n(){
-    var dict = i18n[lang];
-    $all('[data-i18n]').forEach(function(n){ var k=n.getAttribute('data-i18n'); if(n.id==='top100Status') return; if(dict[k]!=null) n.textContent=dict[k]; });
-    $all('[data-i18n-html]').forEach(function(n){ var k=n.getAttribute('data-i18n-html'); if(dict[k]!=null) n.innerHTML=dict[k]; });
-    var prefix=dict.calcNowPrefix, middle=dict.calcNowMiddle;
-    var share=el.shareLabel.textContent||'—'; var tn=el.totalNow.textContent||'—';
-    var notice=el.totalNow.parentNode;
-    notice.innerHTML = prefix + '<span id="shareLabel">'+share+'</span>' + middle + '<span id="totalNow" style="font-weight:600" class="num">'+tn+'</span>';
-    el.shareLabel=document.getElementById('shareLabel'); el.totalNow=document.getElementById('totalNow');
-    if (el.langToggle) el.langToggle.textContent = (lang==='zh')?'中 / EN':'EN / 中';
-    if (el.currentMiles) el.currentMiles.setAttribute('placeholder', dict.phCur);
-    if (el.myDailyMiles) el.myDailyMiles.setAttribute('placeholder', dict.phDaily);
-    if (el.netDailyMilesNow) el.netDailyMilesNow.setAttribute('placeholder', dict.phNetDaily);
-  }
-
-  // logic
-  var today=new Date(); document.getElementById('tgeDate').value='2025-10-15';
-  // restore unlock from localStorage
-  window._resultUnlocked = (localStorage.getItem('falcon_unlock') === '1');
-
-  function httpGetJson(url, ok, err){
-    try{ var xhr=new XMLHttpRequest(); xhr.open('GET',url,true); xhr.setRequestHeader('Cache-Control','no-cache');
-      xhr.onreadystatechange=function(){ if(xhr.readyState===4){ if(xhr.status>=200 && xhr.status<300){ try{ ok(JSON.parse(xhr.responseText)); }catch(e){ err(e); } } else err(new Error('HTTP '+xhr.status)); } };
-      xhr.send(); }catch(e){ err(e); }
-  }
-
-  function fetchTop100(){
-    setText(el.top100Status, i18n[lang].statusLoading); setText(el.top100Sum, '—');
-    var url='https://api.falcon.finance/api/v1/points/leaderboard?ts='+(new Date().getTime());
-    httpGetJson(url, function(data){
-      var list=(data && data.leaderboard && data.leaderboard.splice?data.leaderboard:[]);
-      var sum=0; for(var i=0;i<Math.min(100,list.length);i++){ var v=parseFloat(list[i]&&list[i].points||'0'); if(isFinite(v)) sum+=v; }
-      el.top100Sum.setAttribute('data-raw', String(sum));
-      setText(el.top100Sum, fmt(sum,0)); setText(el.top100Status, i18n[lang].statusUpdated); compute();
-    }, function(e){ setText(el.top100Status, 'Error'); });
-  }
-
-  function compute(){
-    var tge=new Date(document.getElementById('tgeDate').value||'2025-10-15');
-    var days=daysBetween(today,tge); setText(el.daysToTgeNum, days);
-
-    var g=Math.max(0, parseNum(el.growthPct.value,1.3)/100);  // 每日增速→折算为固定每日新增比例（线性）
-    var M0=parseNum(el.currentMiles.value,0);
-    var d0=parseNum(el.myDailyMiles.value,0);
-
-    // 个人：线性累计
-    var myAdded = d0 * days;
-    var myMilesAtTGE = M0 + myAdded;
-    setText(el.myMilesAtTGE, fmt(myMilesAtTGE,2));
-
-    var topRaw=el.top100Sum.getAttribute('data-raw')||el.top100Sum.textContent||'';
-    var topSum=parseNum(topRaw,NaN);
-    var shareNow=Math.max(1e-9, parseNum(el.topShare&&el.topShare.value,70)/100);
-    if(el.shareLabel) el.shareLabel.textContent=(parseNum(el.topShare.value,70)||70);
-    var T0=isFinite(topSum)?(topSum/shareNow):null; if(isFinite(topSum)) setText(el.totalNow, fmt(T0,0));
-
-    var D0=parseNum(el.netDailyMilesNow.value,0);
-    var T_pred=null;
-
-    if(T0!=null){
-      // 全部线性，不复利
-      if(D0>0){
-        T_pred = T0 + D0 * days;
-      }else{
-        var dailyIncFromRate = T0 * g;
-        T_pred = T0 + dailyIncFromRate * days;
-      }
-    }
-
-    setText(el.T_pred, (T_pred!=null)?fmt(T_pred,0):'—');
-
-    var fdv=parseNum(el.fdv.value,1000000000); var ap=Math.max(0, parseNum(el.airdropPct.value,8)/100); var pool=fdv*ap;
-    var sharePct=T_pred?(myMilesAtTGE/T_pred):null; var myVal=(sharePct!=null)?(pool*sharePct):null;
-
-    el.myAirdropValue.setAttribute('data-value', (myVal!=null)?('≈ $'+fmt(myVal,2)):'—');
-    el.sharePct.setAttribute('data-value', (sharePct!=null)?((sharePct*100).toFixed(6)+'%'):'—');
-
-    if(window._resultUnlocked){
-      setText(el.myAirdropValue, el.myAirdropValue.getAttribute('data-value'));
-      setText(el.sharePct, el.sharePct.getAttribute('data-value'));
-      if (el.gateArea) el.gateArea.style.display = 'none';
-      if (document.getElementById('sharePct')) document.getElementById('sharePct').classList.remove('notice');
-    } else {
-      // locked state visible
-      if (el.gateArea) el.gateArea.style.display = 'flex';
-      if (document.getElementById('sharePct')) document.getElementById('sharePct').classList.add('notice');
-    }
-
-    var oneM=(T_pred!=null)?(pool*(1000000/T_pred)):null; setText(el.oneMMilesValue, (oneM!=null)?('≈ $'+fmt(oneM,2)):'—');
-
-    applyI18n(); // keep prefixes correct
-  }
-
-  function unlockNow(){
-    window._resultUnlocked = true;
-    try{ localStorage.setItem('falcon_unlock','1'); }catch(e){}
-    compute();
-  }
-
-  function exportCSV(){ 
-    var lines=[]; 
-    function add(k,v){lines.push(k+','+('"'+String(v).replace(/"/g,'""')+'"'));} 
-    add('Top100', el.top100Sum.textContent||''); 
-    add('TotalNow', el.totalNow.textContent||''); 
-    add('MyMilesAtTGE', el.myMilesAtTGE.textContent||''); 
-    add('TGE_Pred', el.T_pred.textContent||''); 
-    add('MyShare', window._resultUnlocked?(el.sharePct.getAttribute('data-value')||''):'(locked)'); 
-    add('AirdropValue', window._resultUnlocked?(el.myAirdropValue.getAttribute('data-value')||''):'(locked)'); 
-    add('OneMValue', el.oneMMilesValue.textContent||''); 
-    var csv='\ufeff'+lines.join('\n');
-    var blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
-    var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='falcon_estimate.csv'; a.click(); setTimeout(function(){URL.revokeObjectURL(a.href);},1200);
-  }
-
-  // events
-  document.addEventListener('input', function(){ compute(); });
-  if(el.refreshBtn) el.refreshBtn.addEventListener('click', fetchTop100);
-  if(el.exportCsvBtn) el.exportCsvBtn.addEventListener('click', exportCSV);
-
-  // follow + auto-unlock (single button)
-  var followClickedAt = 0;
-  if (el.followBtn) {
-    el.followBtn.addEventListener('click', function(){ followClickedAt = Date.now(); });
-    // Auto-unlock when user returns to the page shortly after clicking follow
-    document.addEventListener('visibilitychange', function(){
-      if (document.visibilityState === 'visible' && !window._resultUnlocked) {
-        if (followClickedAt && (Date.now() - followClickedAt) < 60000) {
-          unlockNow();
-        }
-      }
-    });
-    window.addEventListener('focus', function(){
-      if (!window._resultUnlocked && followClickedAt && (Date.now() - followClickedAt) < 60000) {
-        unlockNow();
-      }
-    });
-  }
-
-  if(el.langToggle) el.langToggle.addEventListener('click', function(){ lang=(lang==='zh')?'en':'zh'; applyI18n(); });
-
-  // init
-  fetchTop100(); applyI18n(); compute();
-})();
-</script>
+  <script src="app.js?v=v20250823-141853"></script>
 </body>
 </html>
