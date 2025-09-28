@@ -302,7 +302,7 @@ async function resolveNetworkAndExpiry(ytAddr, tge){
 
   let _cmpTimer=null; function scheduleCompute(){ if(_cmpTimer) clearTimeout(_cmpTimer); _cmpTimer=setTimeout(compute,80);} 
   function compute(){
-    const tge=new Date(el.tgeDate.value||'2025-10-15');
+    const tge=new Date(el.tgeDate.value||'2025-09-29');
     const days=daysBetween(new Date(),tge); setText(el.daysToTgeNum, days);
 
     const g=Math.max(0, parseNum(el.growthPct.value,1.3)/100);
@@ -389,7 +389,7 @@ document.addEventListener('input', ()=>scheduleCompute());
   if(el.exportCsvBtn) el.exportCsvBtn.addEventListener('click', exportCSV);
 
   // init
-  $('#tgeDate').value='2025-10-15';
+  $('#tgeDate').value='2025-09-29';
   fetchTop100();
   updateYtPriceAndQty();
   scheduleCompute(); applyLang();
